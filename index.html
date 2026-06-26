@@ -1,69 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Smart Parking ESP32</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Walking Gate System</title>
 
 <style>
 body{
-    font-family:Arial;
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#1e1e2f;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    width:350px;
+    background:#fff;
+    border-radius:20px;
+    padding:20px;
     text-align:center;
-    background:#f2f2f2;
+    box-shadow:0 0 20px rgba(0,0,0,.3);
+}
+
+h1{
+    color:#333;
 }
 
 .card{
-    width:300px;
-    margin:auto;
+    margin-top:15px;
+    padding:15px;
+    border-radius:12px;
+    background:#f2f2f2;
+    font-size:20px;
+}
+
+.status{
+    margin-top:20px;
     padding:20px;
-    border-radius:10px;
+    border-radius:15px;
     color:white;
-    font-size:25px;
-    transition:0.5s;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.open{
+    background:#28a745;
+}
+
+.close{
+    background:#dc3545;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🚗 Smart Parking System</h1>
+<div class="container">
 
-<div id="statusBox" class="card">Loading...</div>
+<h1>🚪 Smart Walking Gate</h1>
 
-<p id="distance">Distance: -- cm</p>
+<div class="card">
+📏 Distance
+<h2 id="distance">-- cm</h2>
+</div>
+
+<div class="card">
+📡 Relay Status
+<h2 id="relay">--</h2>
+</div>
+
+<div id="gateCard" class="status close">
+🚪 GATE CLOSED
+</div>
+
+</div>
 
 <script>
 
-const channelID = "3417082";
-const apiKey = "XV2VNM793K4BMYDD";
+async function getData(){
 
-function update(){
+const url="https://api.thingspeak.com/channels/3417082/feeds/last.json";
 
-fetch(`https://api.thingspeak.com/channels/3417082/feeds.json?api_key=XV2VNM793K4BMYDD&results=2`)
-.then(res => res.json())
-.then(data => {
+try{
 
-let status = data.field1;   // 0 or 1 (car status)
-let distance = data.field2; // ultrasonic value
+const response=await fetch(url);
+const data=await response.json();
 
-let box = document.getElementById("statusBox");
+let distance=parseFloat(data.field1);
 
-document.getElementById("distance").innerHTML =
-"Distance: " + distance + " cm";
+document.getElementById("distance").innerHTML=distance.toFixed(1)+" cm";
 
-if(status == 1){
-    box.style.background = "red";
-    box.innerHTML = "🚗 Car Detected - Gate OPEN";
+if(distance<=20){
+
+document.getElementById("relay").innerHTML="🟢 ON";
+
+document.getElementById("gateCard").innerHTML="🚪 GATE OPEN";
+
+document.getElementById("gateCard").className="status open";
+
 }
 else{
-    box.style.background = "green";
-    box.innerHTML = "🅿️ Parking Empty - Gate CLOSED";
+
+document.getElementById("relay").innerHTML="🔴 OFF";
+
+document.getElementById("gateCard").innerHTML="🚪 GATE CLOSED";
+
+document.getElementById("gateCard").className="status close";
+
 }
 
-});
+}
+catch(e){
+
+console.log(e);
 
 }
 
-update();
-setInterval(update, 3000);
+}
+
+getData();
+
+setInterval(getData,5000);
 
 </script>
 
