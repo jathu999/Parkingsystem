@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Smart Parking</title>
+
+<style>
+
+body{
+
+font-family:Arial;
+text-align:center;
+background:#f2f2f2;
+
+}
+
+.box{
+
+width:250px;
+margin:auto;
+padding:30px;
+border-radius:10px;
+font-size:30px;
+color:white;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Smart Parking System</h1>
+
+<div id="box" class="box">
+Loading...
+</div>
+
+<script>
+
+const channel=3417082;
+const key="XV2VNM793K4BMYDD";
+
+function update(){
+
+fetch(`https://api.thingspeak.com/channels/3417082/feeds.json?api_key=XV2VNM793K4BMYDD&results=2`)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let status=data.field1;
+
+let box=document.getElementById("box");
+
+if(status==1){
+
+box.style.background="red";
+
+box.innerHTML="Occupied";
+
+}
+
+else{
+
+box.style.background="green";
+
+box.innerHTML="Empty";
+
+}
+
+});
+
+}
+
+update();
+
+setInterval(update,5000);
+
+</script>
+
+</body>
+</html>
